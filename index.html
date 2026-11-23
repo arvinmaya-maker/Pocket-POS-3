@@ -95,7 +95,7 @@
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-2 flex-wrap">
-                <h1 id="store-name-display" class="font-bold text-base lg:text-lg tracking-tight text-white truncate">Brew & Bites Cafe</h1>
+                <h1 id="store-name-display" class="font-bold text-base lg:text-lg tracking-tight text-white truncate">Pocket POS 3</h1>
                 <span id="sync-status-badge" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 shrink-0">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span id="sync-status-text">JS Active</span>
@@ -426,7 +426,7 @@
       <div class="p-5 overflow-y-auto flex-1 bg-[#0B0B0B]">
         <div id="receipt-printable-area" class="bg-white text-black rounded-xl p-5 font-mono text-xs space-y-3 shadow-lg">
           <div class="text-center border-b border-dashed border-gray-400 pb-3 space-y-1">
-            <div id="receipt-store-name" class="font-bold text-base uppercase">Brew & Bites Cafe</div>
+            <div id="receipt-store-name" class="font-bold text-base uppercase">Pocket POS 3</div>
             <div id="receipt-timestamp" class="text-[10px] text-gray-600"></div>
             <div class="text-[11px]">Order: <strong id="receipt-order-id"></strong></div>
             <div class="text-[11px]">Cashier: <span id="receipt-cashier"></span></div>
@@ -524,7 +524,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1.5">
             <label class="block text-xs font-semibold text-white/80">Store Name</label>
-            <input type="text" id="setting-store-name" placeholder="Brew & Bites Cafe" class="w-full bg-[#0B0B0B] border border-[#5D5754]/40 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+            <input type="text" id="setting-store-name" placeholder="Pocket POS 3" class="w-full bg-[#0B0B0B] border border-[#5D5754]/40 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
           </div>
           <div class="space-y-1.5">
             <label class="block text-xs font-semibold text-white/80">Cashier Name</label>
@@ -775,7 +775,7 @@
       const state = {
         sheetUrl: store.get(KEYS.SHEET_URL) || '',
         scriptUrl: store.get(KEYS.SCRIPT_URL) || '',
-        storeName: store.get(KEYS.STORE_NAME) || 'Brew & Bites Cafe',
+        storeName: store.get(KEYS.STORE_NAME) || 'Pocket POS 3',
         cashierName: store.get(KEYS.CASHIER_NAME) || 'Maya',
         currency: store.get(KEYS.CURRENCY) || '₱',
         logoUrl: store.get(KEYS.LOGO_URL) || '',
@@ -1505,7 +1505,7 @@
         bindClick('btn-save-settings', () => {
           state.sheetUrl = document.getElementById('setting-sheet-url').value.trim();
           state.scriptUrl = document.getElementById('setting-script-url').value.trim();
-          state.storeName = document.getElementById('setting-store-name').value.trim() || 'Brew & Bites Cafe';
+          state.storeName = document.getElementById('setting-store-name').value.trim() || 'Pocket POS 3';
           state.cashierName = document.getElementById('setting-cashier-name').value.trim() || 'Maya';
           state.currency = document.getElementById('setting-currency').value.trim() || '₱';
           state.logoUrl = normalizeCdnUrl(document.getElementById('setting-store-logo').value.trim());
