@@ -1,9 +1,10 @@
-This is a light web-based POS for SMEs that connects to your google sheet. so here are a couple of things you'll need to set you up
-1. Google Account - You need one to create a google sheet
-2. Link a google sheet file to the application, this can be done by 2 ways:
-  1. The google sheet file that is shared to anyone with link, You can copy this template https://docs.google.com/spreadsheets/d/1oxVDfVbIU0DvkaoZlZy-9Vk9sH3RYc6E92jIPl_WXTE/edit?gid=1604214643#gid=1604214643 
-Note: using this way will make your google sheet accessible to anyone who can get a hold of the google sheet url.
-  2. For a secure google sheet file, after copying the template, you can use the apps script from the advance syncing option.
+This is a light web-based POS for SMEs that connects to your Google Sheet. so here are a three things you'll need to start:
+1. Google Account - You need one to create a Google Sheet
+2. Create a Google Sheet file by opening a new blank, then you can copy the template from this Google Sheet: https://docs.google.com/spreadsheets/d/1oxVDfVbIU0DvkaoZlZy-9Vk9sH3RYc6E92jIPl_WXTE/edit?gid=1604214643#gid=1604214643.
+3. Link a Google Sheet file to the application in the settings, this can be done by 2 ways:
+  1. Use a Google Sheet file that is shared to "anyone with link can edit", then copy its url and paste it on the "GOOGLE SHEET URL" field, then click "Save Settings"
+Note: using this option will make your Google Sheet accessible to anyone who can get a hold of the Google Sheet url.
+  2. For a secure Google Sheet file, after copying the template, you can use the apps script from the Advance Syncing Option.
        Step 1: Go to Settings
        Step 2: Open the "Advance Syncing Option"
        Step 3: Click "Copy Code.gs"
@@ -22,5 +23,5 @@ Note: using this way will make your google sheet accessible to anyone who can ge
        Step 16: Click "Save Settings" button
        Step 17: Click the "Sync Sheet" button on the header, (if you're in mobile view, this option is inside the header menu)
 
-Done setting up, you can now apply your menu and price on the google sheet and it will reflect on the Pocket POS 3 UI, 
-Note: make sure to click the Sync every after new updates on the google sheet. to ensure the data is updated.
+Done setting up, you can now apply your menu and price on the Google Sheet and it will reflect on the Pocket POS 3 UI, 
+Note: make sure to click the Sync every after new updates on the Google Sheet. to ensure the data is updated.
