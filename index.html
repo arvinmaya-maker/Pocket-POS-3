@@ -1,8 +1,15 @@
-I<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#141414" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pocket POS" />
+  <link id="pwa-manifest-link" rel="manifest" href="" />
+  <link id="apple-touch-icon-link" rel="apple-touch-icon" href="" />
   <title>Pocket POS - Web Register</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -104,6 +111,10 @@ I<!DOCTYPE html>
 
           <!-- Desktop & Tablet Actions -->
           <div class="hidden sm:flex items-center space-x-2 shrink-0">
+            <button type="button" id="btn-install-pwa" class="hidden px-3.5 py-2.5 rounded-xl bg-[#2F2F2F] hover:bg-[#3F3F3F] text-emerald-400 text-xs font-bold flex items-center gap-1.5 transition-all border border-emerald-500/30 active:scale-95" title="Install Pocket POS App">
+              <i class="fas fa-download text-xs"></i>
+              <span>Install App</span>
+            </button>
             <button type="button" id="btn-add-custom-item" class="px-3.5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-bold flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-500/20 active:scale-95" title="Add Custom Item">
               <i class="fas fa-plus text-xs"></i>
               <span>Custom Item</span>
@@ -244,6 +255,10 @@ I<!DOCTYPE html>
         </div>
 
         <nav class="space-y-2.5">
+          <button type="button" id="drawer-install-pwa-btn" class="hidden w-full p-3.5 rounded-xl bg-[#2F2F2F] hover:bg-[#3F3F3F] text-emerald-400 text-xs font-bold flex items-center gap-3 border border-emerald-500/30">
+            <i class="fas fa-download w-4 text-center"></i>
+            <span>Install Pocket POS App</span>
+          </button>
           <button type="button" id="drawer-custom-item-btn" class="w-full p-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black text-xs font-bold flex items-center gap-3">
             <i class="fas fa-plus w-4 text-center"></i>
             <span>Add Custom Item</span>
@@ -265,7 +280,7 @@ I<!DOCTYPE html>
 
       <div class="p-3.5 rounded-xl bg-[#0B0B0B] border border-[#5D5754]/30 text-[11px] text-white/60 space-y-1">
         <div class="font-semibold text-white">Pocket POS Register</div>
-        <div>Auto-Sync & Local Cache Active</div>
+        <div>PWA Standalone & Offline Cache Ready</div>
       </div>
     </div>
   </div>
@@ -638,6 +653,92 @@ I<!DOCTYPE html>
 
   <script>
     (function () {
+      let deferredInstallPrompt = null;
+
+      function generatePwaIconDataUrl(size, accentHex) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return '';
+
+        // Dark rounded background
+        ctx.fillStyle = '#141414';
+        ctx.fillRect(0, 0, size, size);
+
+        // Accent inner badge
+        const pad = Math.round(size * 0.14);
+        const radius = Math.round(size * 0.22);
+        ctx.fillStyle = accentHex || '#10B981';
+        ctx.beginPath();
+        ctx.roundRect(pad, pad, size - pad * 2, size - pad * 2, radius);
+        ctx.fill();
+
+        // Store / POS glyph
+        ctx.fillStyle = '#0B0B0B';
+        ctx.font = '800 ' + Math.round(size * 0.34) + 'px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('POS', size / 2, size / 2 + size * 0.02);
+        return canvas.toDataURL('image/png');
+      }
+
+      function setupPwaManifestAndSw(accentHex, storeName) {
+        try {
+          const icon192 = generatePwaIconDataUrl(192, accentHex);
+          const icon512 = generatePwaIconDataUrl(512, accentHex);
+
+          const appleTouch = document.getElementById('apple-touch-icon-link');
+          if (appleTouch && icon192) appleTouch.href = icon192;
+
+          const baseUrl = window.location.href.split('#')[0].split('?')[0];
+          const scopeUrl = baseUrl.endsWith('/') ? baseUrl : baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1);
+
+          const manifestObj = {
+            name: storeName || 'Pocket POS',
+            short_name: 'Pocket POS',
+            description: 'Fast offline-capable point-of-sale register synced with Google Sheets.',
+            start_url: baseUrl,
+            scope: scopeUrl,
+            display: 'standalone',
+            orientation: 'any',
+            background_color: '#0B0B0B',
+            theme_color: '#141414',
+            icons: [
+              { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+              { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+            ]
+          };
+
+          const manifestLink = document.getElementById('pwa-manifest-link');
+          if (manifestLink) {
+            const encoded = encodeURIComponent(JSON.stringify(manifestObj));
+            manifestLink.href = 'data:application/manifest+json;charset=utf-8,' + encoded;
+          }
+
+          if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+          }
+        } catch (e) {}
+      }
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        const desktopBtn = document.getElementById('btn-install-pwa');
+        const drawerBtn = document.getElementById('drawer-install-pwa-btn');
+        if (desktopBtn) desktopBtn.classList.remove('hidden');
+        if (drawerBtn) drawerBtn.classList.remove('hidden');
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        const desktopBtn = document.getElementById('btn-install-pwa');
+        const drawerBtn = document.getElementById('drawer-install-pwa-btn');
+        if (desktopBtn) desktopBtn.classList.add('hidden');
+        if (drawerBtn) drawerBtn.classList.add('hidden');
+      });
+
       const mem = {};
       const store = {
         get(k) {
@@ -698,7 +799,6 @@ I<!DOCTYPE html>
         const cleanHex = /^#[0-9A-Fa-f]{6}$/.test(String(hex || '').trim()) ? String(hex).trim() : '#10B981';
         state.accentColor = cleanHex;
 
-        // Calculate relative luminance (WCAG) so dark accent colors get white text and bright ones get black text
         const r = parseInt(cleanHex.slice(1, 3), 16) / 255;
         const g = parseInt(cleanHex.slice(3, 5), 16) / 255;
         const b = parseInt(cleanHex.slice(5, 7), 16) / 255;
@@ -731,6 +831,7 @@ I<!DOCTYPE html>
         const label = document.getElementById('setting-accent-hex-label');
         if (picker) picker.value = cleanHex;
         if (label) label.textContent = cleanHex.toUpperCase();
+        setupPwaManifestAndSw(cleanHex, state.storeName);
       }
 
       function setModalVisible(id, visible) {
@@ -857,7 +958,6 @@ I<!DOCTYPE html>
       function normalizeCsvResponse(rawText) {
         const text = String(rawText || '').trim();
         if (!text) return '';
-        // Strip JSONP wrapper if Google returns google.visualization.Query.setResponse(...)
         const jsonpMatch = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
         if (jsonpMatch) {
           try {
@@ -888,6 +988,36 @@ I<!DOCTYPE html>
           throw new Error('PRIVATE_SHEET');
         }
         return normalizeCsvResponse(raw);
+      }
+
+      function parseMenuRowsFromCsv(csvText) {
+        const rows = parseCsv(csvText);
+        if (rows.length <= 1) return [];
+        const parsed = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i];
+          if (!r || !r.length) continue;
+          const id = String(r[0] || '').trim();
+          const category = String(r[1] || 'General').trim();
+          const name = String(r[2] || '').trim();
+          if (!name && !id) continue;
+          const shortP = parseFloat(String(r[3] || '').replace(/[^0-9.-]/g, '')) || 0;
+          const smallP = parseFloat(String(r[4] || '').replace(/[^0-9.-]/g, '')) || 0;
+          const medP = parseFloat(String(r[5] || '').replace(/[^0-9.-]/g, '')) || 0;
+          const largeP = parseFloat(String(r[6] || '').replace(/[^0-9.-]/g, '')) || 0;
+          const availRaw = String(r[7] ?? 'true').trim().toLowerCase();
+          const available = !(availRaw === 'false' || availRaw === 'no' || availRaw === '0');
+          const imageUrl = normalizeCdnUrl(String(r[8] || '').trim()) || '☕';
+          parsed.push({
+            id: id || 'ITEM-' + i,
+            category: category || 'General',
+            name: name || id,
+            prices: { short: shortP, small: smallP, medium: medP, large: largeP },
+            available,
+            imageUrl
+          });
+        }
+        return parsed;
       }
 
       function normalizeCdnUrl(url) {
@@ -942,7 +1072,6 @@ I<!DOCTYPE html>
         const icon = document.getElementById('sync-spin-icon');
         if (icon) icon.classList.add('fa-spin');
         try {
-          // Prefer Apps Script endpoint first when configured so private Google Sheets stay secure
           if (state.scriptUrl) {
             try {
               const sep = state.scriptUrl.includes('?') ? '&' : '?';
@@ -1067,7 +1196,6 @@ I<!DOCTYPE html>
             const price = parseFloat(btn.getAttribute('data-price')) || 0;
             const prod = list[idx];
             if (!prod) return;
-            // Only merge into existing non-discounted cart items so discounted items stay separate
             const found = state.cart.find(c => c.id === prod.id && c.size === size && !(c.discountPct > 0));
             if (found) found.qty += 1;
             else state.cart.push({ id: prod.id, name: prod.name, size, price, qty: 1, discountPct: 0 });
@@ -1172,6 +1300,16 @@ I<!DOCTYPE html>
       function bindClick(id, handler) {
         const el = document.getElementById(id);
         if (el) el.addEventListener('click', handler);
+      }
+
+      async function triggerInstallPwa() {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+        if (choice && choice.outcome === 'accepted') {
+          showToast('Installing Pocket POS...', 'success');
+        }
+        deferredInstallPrompt = null;
       }
 
       function updateCheckoutTotals() {
@@ -1344,6 +1482,12 @@ I<!DOCTYPE html>
 
         renderMenu();
         renderCart();
+
+        bindClick('btn-install-pwa', triggerInstallPwa);
+        bindClick('drawer-install-pwa-btn', () => {
+          setModalVisible('mobile-burger-drawer', false);
+          triggerInstallPwa();
+        });
 
         bindClick('btn-open-settings', () => openSettings(false));
         bindClick('drawer-settings-btn', () => {
@@ -1590,7 +1734,6 @@ I<!DOCTYPE html>
           if (pct === 0) {
             item.discountPct = 0;
           } else if (item.qty > 1) {
-            // Split 1 unit onto its own line with discount so remaining units stay untouched
             item.qty -= 1;
             state.cart.splice(idx + 1, 0, {
               id: item.id,
